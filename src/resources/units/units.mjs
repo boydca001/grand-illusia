@@ -42,6 +42,8 @@ let UnitDict =
     )
 }
 
+export default UnitDict;
+
 //test
 var testvar = {...UnitDict["Maya"]};
 console.log({...UnitDict["Maya"]});

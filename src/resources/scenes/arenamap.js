@@ -1,4 +1,6 @@
-import { Scene, Tilemaps } from "phaser"
+import { Scene } from "phaser"
+import UnitManager from "@/resources/unitManager"
+import StateManager from "@/resources/StateManager";
 
 export default class Arenamap extends Scene
 {
@@ -52,12 +54,48 @@ export default class Arenamap extends Scene
         //create our controls
         this.cursors = this.input.keyboard.createCursorKeys(); 
 
-        //and then the player to use them
+        //Create a map cursor to indicate the current screen focus
         this.indic = this.makeCursor();
         this.indic.setPosition(centerTile.getCenterX(),centerTile.getCenterY());
 
+        this.manager = new UnitManager();
+
+        //create allies
+        this.manager.addUnit(this, this.map, 5, 9, "Maya", 1);
+
+        //create enemies
+        this.manager.addUnit(this, this.map, 5, 2, "Slime", 0);
+
         //listener for clicking around
         this.input.on('pointerdown', this.goToClickedTile, this);
+
+        this.state = new StateManager();
+        this.state.checkState(this.manager);
+
+        //check for my brain if an algorithm i want to implement works. i choose 3, 5
+        {
+            var xstart = 5;
+            var ystart = 5;
+            var ranges = 4;
+            var xcounter = (ranges*2) - 1;
+            console.log(xcounter);
+            var yspread = (ranges - 1);
+            for (let index = 0; index < xcounter; index++) {
+                for (let index2 = (Math.abs(yspread) - ranges) + 1; index2 < (ranges - Math.abs(yspread)); index2++) {
+                    var curTile = layer.getTileAt((xstart + (ranges - 1) - index), (ystart + index2));
+                    console.log("Value offsets: " + index + ", " + yspread);
+                    if (curTile == null)
+                    {
+                        console.log("No tile at " + (xstart + (ranges - 1) - index) + ", " + (ystart + index2) + ".")
+                    }
+                    else
+                    {
+                        this.add.sprite(curTile.getCenterX(), curTile.getCenterY(), 'pointer');
+                    }
+                }
+                yspread -= 1;
+            }
+        }
     }
 
     update()
@@ -68,11 +106,16 @@ export default class Arenamap extends Scene
     goToClickedTile()
     {
         //console.log(this.map);
+        //if it is not your turn, this does nothing!
+        if (!this.state.isPlayerTurn)
+        {
+            return;
+        }
         var targetTile = this.map.getTileAtWorldXY(this.input.activePointer.worldX, this.input.activePointer.worldY + 32);
 
         if (targetTile == null)
         {
-            //console.log("No tile found, but the cursor is at " + this.input.activePointer.worldX +", " + this.input.activePointer.worldY);
+            console.log("No tile found, but the cursor is at " + this.input.activePointer.worldX +", " + this.input.activePointer.worldY);
         }
         else
         {
@@ -96,6 +139,7 @@ export default class Arenamap extends Scene
                     ease: 'quad'
                 }
             )
+            this.manager.findAt(targetTile.x, targetTile.y);
         }
     }
 
