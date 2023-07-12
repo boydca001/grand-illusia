@@ -1,6 +1,7 @@
 import { Scene } from "phaser"
 import UnitManager from "@/resources/unitManager"
-import StateManager from "@/resources/StateManager";
+import StateManager from "@/resources/StateManager"
+import { tileSearch, getTilesInRadius, moveDistance } from "@/resources/TileSearch.mjs"
 
 export default class Arenamap extends Scene
 {
@@ -71,31 +72,6 @@ export default class Arenamap extends Scene
 
         this.state = new StateManager();
         this.state.checkState(this.manager);
-
-        //check for my brain if an algorithm i want to implement works. i choose 3, 5
-        {
-            var xstart = 5;
-            var ystart = 5;
-            var ranges = 4;
-            var xcounter = (ranges*2) - 1;
-            console.log(xcounter);
-            var yspread = (ranges - 1);
-            for (let index = 0; index < xcounter; index++) {
-                for (let index2 = (Math.abs(yspread) - ranges) + 1; index2 < (ranges - Math.abs(yspread)); index2++) {
-                    var curTile = layer.getTileAt((xstart + (ranges - 1) - index), (ystart + index2));
-                    console.log("Value offsets: " + index + ", " + yspread);
-                    if (curTile == null)
-                    {
-                        console.log("No tile at " + (xstart + (ranges - 1) - index) + ", " + (ystart + index2) + ".")
-                    }
-                    else
-                    {
-                        this.add.sprite(curTile.getCenterX(), curTile.getCenterY(), 'pointer');
-                    }
-                }
-                yspread -= 1;
-            }
-        }
     }
 
     update()
