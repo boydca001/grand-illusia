@@ -28,7 +28,7 @@ export default class BaseAction
     targets = 0;
 
 
-    constructor({name, desc, cost, range, activate, targets, animate})
+    constructor({name, desc, cost, range, activate, targets})
     {
         this.name = name;
         this.desc = desc;

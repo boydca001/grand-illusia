@@ -20,6 +20,7 @@ export default class Preloader extends Scene
 
         //load anything related to animations.
         this.load.spritesheet('sk_strike', 'assets/sk_strike.png', {frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('sk_bounce', 'assets/sk_bounce.png', {frameWidth: 64, frameHeight: 64});
 
         //load ui elements
         this.load.image('ui_prompt', 'assets/ui_prompt.png');

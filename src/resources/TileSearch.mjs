@@ -250,9 +250,10 @@ function getNeighbors(tile)
 export function getTilesInRadius(startTile, ranges, layer)
 {
     console.log(layer);
+    ranges += 1;
     var xstart = startTile.x;
     var ystart = startTile.y;
-    var xcounter = (ranges*2) - 1;
+    var xcounter = ((ranges)*2) - 1;
     console.log(xcounter);
     var yspread = (ranges - 1);
     var output = [];

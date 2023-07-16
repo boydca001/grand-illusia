@@ -38,7 +38,8 @@ let UnitDict =
         1,
         1,
         1,
-        "An interesting, playful gelatinous monster that roams certain places. It is not very strong, but it is trying it's best..."
+        "An interesting, playful gelatinous monster that roams certain places. It is not very strong, but it is trying it's best...",
+        ["Bounce"]
     )
 }
 

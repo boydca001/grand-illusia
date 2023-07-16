@@ -60,7 +60,7 @@ export default class Arenamap extends Scene
         this.indic.setPosition(centerTile.getCenterX(),centerTile.getCenterY());
 
         //create allies
-        unitManager.addUnit(this, this.map, 5, 5    , "Maya", 1);
+        unitManager.addUnit(this, this.map, 5, 5, "Maya", 1);
 
         //create enemies
         unitManager.addUnit(this, this.map, 5, 2, "Slime", 0);
@@ -102,11 +102,38 @@ export default class Arenamap extends Scene
         var unitsCanAct = [];
         unitManager.enemyUnits.forEach(element => {
             if (element.canAct)
-            unitsCanAct.push(element)
+            {
+                unitsCanAct.push(element);
+            }
         });
 
+        //randomly choose one.
+        this.targetingUnit = unitsCanAct[Math.floor(Math.random() * unitsCanAct.length)];
+
         //as i've not coded in any support abilities yet, so the ai will always take the aggressive approach.
-        
+        //find nearest ally.
+        var activeAlly = null;
+        var distance = null;
+        unitManager.allyUnits.forEach(element => {
+            //ignore defeated allies.
+            if (element.props.hitPoints > 0)
+            {
+                var thisDistance = Math.sqrt(Math.pow(this.targetingUnit.pos.x - element.pos.x, 2) + Math.pow(this.targetingUnit.pos.y - element.pos.y, 2));
+                if (distance == null || distance > thisDistance)
+                {
+                    distance = thisDistance;
+                    activeAlly = element;
+                }
+                
+            }
+        });
+        console.log("Selected: " + activeAlly.props.name);
+        //step 1. choose randomly the ability you'd like to use.
+        var chosenSkill = this.targetingUnit.props.skills[(Math.random() * (this.targetingUnit.props.skills.length - 1))];
+
+        //step 2. is the target in range?
+        var skillRange = getTilesInRadius(this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y),actionDict[chosenSkill].range, this.map);
+
     }
 
     postAction(unit)
@@ -142,7 +169,7 @@ export default class Arenamap extends Scene
 
         //use that range to highlight all selectable tiles. we also need to keep track of this
         //because these same tiles are the ones that the player will be allowed to click to target
-        var tilesInRange = getTilesInRadius(this.map.getTileAt(actingUnit.pos.x, actingUnit.pos.y), range + 1, this.map);
+        var tilesInRange = getTilesInRadius(this.map.getTileAt(actingUnit.pos.x, actingUnit.pos.y), range, this.map);
         this.targetedTiles = tilesInRange;
 
         this.highlightSelection(tilesInRange);
@@ -294,8 +321,8 @@ export default class Arenamap extends Scene
     beginMove(targetUnit)
     {
         var center = this.map.getTileAt(targetUnit.pos.x, targetUnit.pos.y);
-        //for now, everyone's move distance is 4. 5 just because of how getTilesInRadius calculates
-        var targetedTiles = getTilesInRadius(center, 5, this.map);
+        //for now, everyone's move distance is 4.
+        var targetedTiles = getTilesInRadius(center, 4, this.map);
         this.targetedTiles = targetedTiles;
         this.highlightSelection(targetedTiles);
 

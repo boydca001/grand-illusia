@@ -50,8 +50,7 @@ const actionDict = {
         range: 1,
         activate: (tile, unit) => {
             console.log("Attacking!");
-            var map = tile.tilemap;
-            var scene = map.scene;
+            var scene = tile.tilemap.scene;
             var fx = scene.add.sprite(tile.getCenterX(), tile.getCenterY() - 20);
             fx.setDepth(1);
             fx.anims.create(animationDict["Strike"]);
@@ -82,6 +81,43 @@ const actionDict = {
         targets: TARGETS_ENEMY
     }
 
-    )
+    ),
+
+    "Bounce" : new BaseAction({
+        name: "Bounce",
+        desc: "A simple attack. Slime-like enemies like to use it.",
+        cost: 0,
+        range: 1,
+        activate: (tile, unit) => {
+            var scene = tile.tilemap.scene;
+            var fx = scene.add.sprite(tile.getCenterX(), tile.getCenterY() - 20);
+            fx.setDepth(1);
+            fx.anims.create(animationDict["Bounce"]);
+            fx.on('animationcomplete', () => {
+                var target = unitManager.findAt(tile.x, tile.y);
+                if (target != 0)
+                {
+                    var damage = Math.ceil(unit.props.attack * 2 * normalSpread()) - target.props.defense;
+                    target.props.hitPoints -= damage;
+                    if (target.props.hitPoints < 0)
+                    {
+                        target.props.hitPoints = 0;
+                    }
+                    console.log(damage + " damage to " + target.props.name + "!");
+                    damageFX(tile, damage);
+                    eventManager.emit("afterAction", unit);
+                }
+                else
+                {
+                    console.log("(No unit exists at the targeted tile)");
+                }
+                
+                fx.destroy();
+                stateManager.inAnimation = false;
+            })
+
+        },
+        targets: TARGETS_ENEMY
+    })
 }
 export default actionDict;

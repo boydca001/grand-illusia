@@ -22,6 +22,7 @@ export default class Unit
     speed;
     luck;
     description;
+    skills;
 
     constructor(
         name,
@@ -39,7 +40,8 @@ export default class Unit
         hit,
         speed,
         luck,
-        description = "Hmm...? This unit has no description!")
+        description = "Hmm...? This unit has no description!",
+        skills = [])
     {
         this.name = name;
         this.hitPoints = hitPoints;
@@ -59,6 +61,7 @@ export default class Unit
         this.speed = speed;
         this.luck = luck;
         this.description = description;
+        this.skills = skills;
     }
     //Generic handler for taking damage, but really just manipulates HP. key: 0 = healing | 1 = physdamage | 2 = magicdamage
     takeDamage(damageType, damageAmount, damageElem = 0) 
