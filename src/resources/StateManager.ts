@@ -1,20 +1,26 @@
-import UnitManager from "./unitManager";
+import { ST } from "next/dist/shared/lib/utils";
+import unitManager from "./unitManager";
+import eventManager from "./scenes/eventManager";
 
-export default class StateManager
+class StateManager
 {
     public isPlayerTurn:boolean;
     public victoryState:number = 0;
     public actionCount: number = 0;
+    public selectionMode: boolean = false;
+    public confirmationMode: boolean = false;
+    public selectMove: boolean = false;
+    public inAnimation: boolean = false;
     constructor()
     {
         this.isPlayerTurn = false;
     }
 
-    checkState(manager : UnitManager)
+    checkState()
     {
         //check for victory state
         var allEnemiesDefeated = true;
-        manager.enemyUnits.forEach(element => {
+        unitManager.enemyUnits.forEach(element => {
             if (element.props.hitPoints > 0)
             {
                 allEnemiesDefeated = false;
@@ -26,7 +32,7 @@ export default class StateManager
             this.victoryState = 1;
         }
         var allAlliesDefeated = true;
-        manager.allyUnits.forEach(element => {
+        unitManager.allyUnits.forEach(element => {
             if (element.props.hitPoints > 0)
             {
                 allAlliesDefeated = false;
@@ -51,6 +57,7 @@ export default class StateManager
             {
                 this.isPlayerTurn = false;
                 console.log("Enemy turn");
+                eventManager.emit('ai_turn');
             }
             else
             {
@@ -62,3 +69,7 @@ export default class StateManager
         
     }
 }
+
+const stateManager = new StateManager;
+
+export default stateManager;

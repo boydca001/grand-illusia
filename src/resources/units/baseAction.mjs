@@ -27,9 +27,8 @@ export default class BaseAction
     //who the action is INTENDED to be used on. The actual possible targets may vary or be a combination of the options
     targets = 0;
 
-    animate;
 
-    constructor(name, desc, cost, range, activate, targets, animate)
+    constructor({name, desc, cost, range, activate, targets, animate})
     {
         this.name = name;
         this.desc = desc;
@@ -37,7 +36,6 @@ export default class BaseAction
         this.range = range;
         this.activate = activate;
         this.targets = targets;
-        this.animate = animate;
 
     }
 

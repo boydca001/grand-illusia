@@ -1,16 +1,20 @@
 
 
-class UXHelper
+export default class UXHelper
 {
+    name = "";
+    desc = "";
+    curHP = "";
+    curMP = "";
     constructor()
     {
-        this.name = "";
-        this.desc = "";
-        this.curHP = "";
-        this.curMP = "";
+        if (UXHelper._instance)
+        {
+            return UXHelper._instance;
+        }
+        console.log("Made a helper.");
+        UXHelper._instance = this;
     }
 }
 
 const helper = new UXHelper();
-
-export default helper;

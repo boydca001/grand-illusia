@@ -1,19 +1,18 @@
 import { Scene } from "phaser"
+import unitManager from "./unitManager";
 
 //a little helper for calculating the distance/paths for tiles and and whether or not they're reachable.
-//this function expects an array of Phaser.Tilemaps.Tile., a starting tile, and an ending tile, the latter of whom is ideally in that list.
+//this function expects a starting tile, and an ending tile, and takes into account which side a unit using
+// it is on and to ignore tiles occupied by opposing units.
 export function tileSearch(startTile, endTile)
 {
     var openList = [];
     var closedList = [];
 
-    /*   //maybe remove the starting node from the list. probably isn't necessary? 
-    if (tileList.includes(startTile))
-    {
-        var index = tileList.indexOf(startTile);
-        tileList.splice()
-    }*/
 
+    //find out what group the unit requesting this search is in (as they will generally always be on startTile)
+    var thisUnit = unitManager.findAt(startTile.x, startTile.y)
+    var isAlly = unitManager.allyUnits.includes(thisUnit);
     //create our starting point.
     //our format should be {tile, g, h, f}
     openList.push({tile : startTile, g : 0, h : distanceFrom(startTile, endTile), f : distanceFrom(startTile, endTile), p : null});
@@ -54,9 +53,34 @@ export function tileSearch(startTile, endTile)
         var neighbors = getNeighbors(lowestF.tile);
 
         neighbors.forEach(element => {
+            //check if this tile contains a unit of the opposing side
+            var obstructed = false;
+            console.log(element);
+            if (element !=null)
+            {
+                var neighborUnit = unitManager.findAt(element.x, element.y);
+                if (neighborUnit)
+                {
+                    //this tile is occupied. check if it is occupied by an ally or enemy
+                    if(isAlly)
+                    {
+                        if (!unitManager.allyUnits.includes(neighborUnit))
+                        {
+                            obstructed = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!unitManager.enemyUnits.includes(neighborUnit))
+                        {
+                            obstructed = true;
+                        }
+                    }
+                }
+            }
             // here we place conditions for valid and invalid nodes. a "tile" that is equal to null or unmapped tiles are invalid tiles,
             // and elements in closedList shouldn't be checked twice.
-            if (element == null || closedList.find(x => x.tile === element))
+            if (element == null || closedList.find(x => x.tile === element) || obstructed)
             {
                 //do nothing
             }
@@ -225,6 +249,7 @@ function getNeighbors(tile)
 //return an array of values that contain every tile within ranges radius of the coordinate pair given.
 export function getTilesInRadius(startTile, ranges, layer)
 {
+    console.log(layer);
     var xstart = startTile.x;
     var ystart = startTile.y;
     var xcounter = (ranges*2) - 1;
