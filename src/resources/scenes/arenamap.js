@@ -87,10 +87,26 @@ export default class Arenamap extends Scene
         //listener to resolve any post-action events
         eventManager.on('afterAction', this.postAction)
 
+        eventManager.on('ai_turn', this.AIAction)
+
         this.selectGroup = this.add.group({defaultKey: 'ui_prompt', classType: Phaser.GameObjects.Image});
         this.targetedTiles = [];
         this.targetSkill = "";
         this.targetingUnit = null;
+    }
+
+    //Begin the routine for the AI taking its turn.
+    AIAction()
+    {
+        //select a random enemy unit that can act.
+        var unitsCanAct = [];
+        unitManager.enemyUnits.forEach(element => {
+            if (element.canAct)
+            unitsCanAct.push(element)
+        });
+
+        //as i've not coded in any support abilities yet, so the ai will always take the aggressive approach.
+        
     }
 
     postAction(unit)
