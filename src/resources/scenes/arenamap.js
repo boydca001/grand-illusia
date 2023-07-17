@@ -87,7 +87,7 @@ export default class Arenamap extends Scene
         //listener to resolve any post-action events
         eventManager.on('afterAction', this.postAction)
 
-        eventManager.on('ai_turn', this.AIAction)
+        eventManager.on('ai_turn', this.AIAction, this);
 
         this.selectGroup = this.add.group({defaultKey: 'ui_prompt', classType: Phaser.GameObjects.Image});
         this.targetedTiles = [];
@@ -107,8 +107,20 @@ export default class Arenamap extends Scene
             }
         });
 
+
         //randomly choose one.
         this.targetingUnit = unitsCanAct[Math.floor(Math.random() * unitsCanAct.length)];
+
+        //move the camera here, to focus attention.
+        this.tweens.add(
+            {
+                targets: this.cameras.main,
+                scrollX: this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y).getCenterX() - this.camXOffset,
+                scrollY: this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y).getCenterY() - this.camYOffset,
+                duration: 500,
+                ease : 'quad'
+            }
+        )
 
         //as i've not coded in any support abilities yet, so the ai will always take the aggressive approach.
         //find nearest ally.
@@ -131,8 +143,102 @@ export default class Arenamap extends Scene
         //step 1. choose randomly the ability you'd like to use.
         var chosenSkill = this.targetingUnit.props.skills[(Math.random() * (this.targetingUnit.props.skills.length - 1))];
 
-        //step 2. is the target in range?
-        var skillRange = getTilesInRadius(this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y),actionDict[chosenSkill].range, this.map);
+        //step 2. is the target in range? every range in this game is diamond-shaped insofar, so we can just use manhattan distance.
+        distance = Math.abs(this.targetingUnit.pos.x - activeAlly.pos.x) + Math.abs(this.targetingUnit.pos.y - activeAlly.pos.y);
+
+        if (distance <= actionDict[chosenSkill].range)
+        {
+            //we are in range now, so just use the skill and end your turn
+            var startingTile = this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y);
+            var targetsTile = this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y);
+            var indicator = this.selectGroup.get(startingTile.getCenterX(), startingTile.getCenterY())
+            indicator.setTexture('target');
+            indicator.visible = true;
+            indicator.active = true;
+            var moveIndicator = this.tweens.add({
+                targets: indicator,
+                x: targetsTile.getCenterX(),
+                y: targetsTile.getCenterY(),
+                delay: 300,
+                duration: 200,
+                completeDelay: 1200,
+                ease: 'elastic'
+
+            })
+            moveIndicator.once('complete', () => {
+                console.log("Doing " + chosenSkill);
+                actionDict[chosenSkill].activate(targetsTile, this.targetingUnit);
+            })
+        }
+        else
+        {
+            //we are not in range, so try to get there
+            //find path to the target
+            var fullPath = tileSearch(this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y), this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y));
+            //now, find all tiles that would allow you to be in range
+            var allTilesInRange = getTilesInRadius(this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y), actionDict[chosenSkill].range, this.map);
+            //filter out occupied tiles
+            var openTiles = [];
+            allTilesInRange.forEach(element => {
+                if(unitManager.allyUnits.find(x => x.pos.x === element.x && x.pos.y === element.y) || unitManager.enemyUnits.find(x => x.pos.x === element.x && x.pos.y === element.y))
+                {
+                    //this tile is occupied by someone already. Omit it.
+                }
+                else
+                {
+                    //this tile is available, so add it to the real list
+                    openTiles.push(element);
+                }
+                
+            });
+            var willBeInRange = false;
+            //since all units have a move distance of 4, we only ever use the first four entries of fullPath
+            var path = fullPath.slice(0,4);
+            //if we would arrive in range before travelling this full distance, then shorten the path.
+            for (let index = 0; index < 2; index++) {
+                if (openTiles.includes(path[index]))
+                {
+                    path = path.slice(0, index + 1);
+                    willBeInRange = true;
+                    break;
+                }
+            }
+            //temporary- just display the path.
+            path.forEach(element => {
+                element = this.selectGroup.get(element.getCenterX(), element.getCenterY(), 'target')
+                element.setTexture('target');
+                element.visible = true;
+                element.active = true;
+            });
+            this.time.delayedCall(900, () => {
+                this.flushSelectGroup();
+
+                this.targetingUnit.moveTo(path[path.length - 1]);
+                var startingTile = this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y);
+                var targetsTile = this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y);
+                eventManager.once("completeAIturn", () => {
+                    var indicator = this.selectGroup.get(startingTile.getCenterX(), startingTile.getCenterY())
+                    indicator.setTexture('target');
+                    indicator.visible = true;
+                    indicator.active = true;
+                    var moveIndicator = this.tweens.add({
+                        targets: indicator,
+                        x: targetsTile.getCenterX(),
+                        y: targetsTile.getCenterY(),
+                        delay: 300,
+                        duration: 200,
+                        completeDelay: 1200,
+                        ease: 'elastic'
+
+                    })
+                    moveIndicator.once('complete', () => {
+                        console.log("Doing " + chosenSkill);
+                        actionDict[chosenSkill].activate(targetsTile, this.targetingUnit);
+                    })
+                })
+            })
+
+        }
 
     }
 
@@ -214,10 +320,7 @@ export default class Arenamap extends Scene
                 this.targetingUnit.moveTo(targetTile);
 
                 //clean up the UI. TODO: abstract all calls to do this into a function so there isn't as much repeated code
-                var children = this.selectGroup.getChildren()
-                children.forEach(element => {
-                    this.selectGroup.killAndHide(element);
-                });
+                this.flushSelectGroup();
             }
             return;
         }
@@ -242,10 +345,7 @@ export default class Arenamap extends Scene
                 stateManager.confirmationMode = true;
                 eventManager.emit('confirm', {skill : this.targetSkill, tile : targetTile});
                 //clean up this UI
-                var children = this.selectGroup.getChildren()
-                children.forEach(element => {
-                    this.selectGroup.killAndHide(element);
-                });
+                this.flushSelectGroup();
             }
 
             return;
@@ -360,11 +460,7 @@ export default class Arenamap extends Scene
         cancel.once('pointerdown', () => {
             stateManager.selectionMode = false;
             stateManager.selectMove = false;
-            var children = this.selectGroup.getChildren();
-            children.forEach(element => {
-                this.selectGroup.killAndHide(element);
-                element.removeAllListeners();
-            });
+            this.flushSelectGroup();
 
             //take the camera back to the original unit
             var returnTile = this.map.getTileAt(returnUnit.pos.x, returnUnit.pos.y);
@@ -384,6 +480,15 @@ export default class Arenamap extends Scene
         })
     }
 
+    //remove all images in the select group from the screen. Used to clean up any images used to indicate targeting
+    flushSelectGroup()
+    {
+        var children = this.selectGroup.getChildren()
+        children.forEach(element => {
+            this.selectGroup.killAndHide(element);
+            element.removeAllListeners();
+        });
+    }
     /*
     windows = [];
     openMenu()

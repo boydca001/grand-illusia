@@ -66,7 +66,6 @@ const actionDict = {
                     }
                     console.log(damage + " damage to " + target.props.name + "!");
                     damageFX(tile, damage);
-                    eventManager.emit("afterAction", unit);
                 }
                 else
                 {
@@ -75,6 +74,7 @@ const actionDict = {
                 
                 fx.destroy();
                 stateManager.inAnimation = false;
+                eventManager.emit("afterAction", unit);
             })
             fx.play('strike');
         },
@@ -89,14 +89,18 @@ const actionDict = {
         cost: 0,
         range: 1,
         activate: (tile, unit) => {
+            console.log(tile);
+            console.log(unit);
             var scene = tile.tilemap.scene;
             var fx = scene.add.sprite(tile.getCenterX(), tile.getCenterY() - 20);
             fx.setDepth(1);
             fx.anims.create(animationDict["Bounce"]);
             fx.on('animationcomplete', () => {
                 var target = unitManager.findAt(tile.x, tile.y);
+                console.log("This is running");
                 if (target != 0)
                 {
+                    console.log("and so is this ");
                     var damage = Math.ceil(unit.props.attack * 2 * normalSpread()) - target.props.defense;
                     target.props.hitPoints -= damage;
                     if (target.props.hitPoints < 0)
@@ -105,17 +109,16 @@ const actionDict = {
                     }
                     console.log(damage + " damage to " + target.props.name + "!");
                     damageFX(tile, damage);
-                    eventManager.emit("afterAction", unit);
                 }
                 else
                 {
                     console.log("(No unit exists at the targeted tile)");
                 }
-                
                 fx.destroy();
                 stateManager.inAnimation = false;
+                eventManager.emit("afterAction", unit);
             })
-
+            fx.play("bounce");
         },
         targets: TARGETS_ENEMY
     })

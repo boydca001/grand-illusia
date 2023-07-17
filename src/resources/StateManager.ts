@@ -57,11 +57,21 @@ class StateManager
             {
                 this.isPlayerTurn = false;
                 console.log("Enemy turn");
+                //refresh everyone's action/movement status
+                unitManager.enemyUnits.forEach(element => {
+                    element.canAct = true;
+                    element.canMove = true;
+                });
                 eventManager.emit('ai_turn');
             }
             else
             {
                 this.isPlayerTurn = true;
+                //refresh everyone's action/movement status
+                unitManager.allyUnits.forEach(element => {
+                    element.canAct = true;
+                    element.canMove = true;
+                });
                 console.log("Player's turn!");
             }
         }

@@ -3,6 +3,7 @@ import Unit from '../resources/units/baseUnit.mjs'
 import UnitDict from "../resources/units/units.mjs"
 import { tileSearch } from './TileSearch.mjs';
 import stateManager from './StateManager';
+import eventManager from './scenes/eventManager';
 
 
 class MapUnit
@@ -50,7 +51,8 @@ class MapUnit
             })
         });
         var timeline = this.image.scene.tweens.chain({tweens: tweens,
-        onComplete: () => {stateManager.inAnimation = false;}});
+        onComplete: () => {stateManager.inAnimation = false;
+        eventManager.emit("completeAIturn")}});
         this.pos.x = routeSliced[routeSliced.length - 1].x;
         this.pos.y = routeSliced[routeSliced.length - 1].y;
     }

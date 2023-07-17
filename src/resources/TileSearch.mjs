@@ -76,6 +76,11 @@ export function tileSearch(startTile, endTile)
                             obstructed = true;
                         }
                     }
+                    //last-minute check: do NOT disqualify the end tile in this way
+                    if(element == endTile)
+                    {
+                        obstructed = false;
+                    }
                 }
             }
             // here we place conditions for valid and invalid nodes. a "tile" that is equal to null or unmapped tiles are invalid tiles,
