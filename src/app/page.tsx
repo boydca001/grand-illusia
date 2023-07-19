@@ -18,25 +18,7 @@ export default function Home() {
         />
       </div>
 
-      <div className="mb-32 space-x-2 grid text-center lg:mb-0 lg:grid-cols-2 lg:text-left">
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-gray-900 border-solid px-5 py-4 bg-sky-400/30 transition-colors hover:border-gray-200 hover:bg-sky-400/70"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{backgroundImage: "url("+bgImage+")"}}
-        >
-          <h2 className={`mb-3 text-2xl font-semibold text-gray-200`}>
-            Discover{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm text-gray-200 group-hover:opacity-100 opacity-50`}>
-            Learn about the a world of challenge and inspiration
-          </p>
-        </a>
+      <div className="mb-32 space-x-2 grid text-center lg:mb-0 lg:grid-cols-1 lg:text-left">
 
         <Link
           href="/select"
@@ -44,7 +26,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <h2 className={`mb-3 text-2xl font-semibold text-gray-200`}>
+          <h2 className={`mb-10 mt-10 text-2xl font-semibold text-gray-200`}>
             Play{' '}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
@@ -52,23 +34,6 @@ export default function Home() {
           </h2>
           <p className={`m-0 max-w-[30ch] text-sm text-gray-200 group-hover:opacity-100 opacity-50`}>
             Close your eyes, and begin your adventure.
-          </p>
-        </Link>
-
-        <Link
-          href="/playtest"
-          className="group rounded-lg border border-gray-900 border-transparent bg-blue-400/30 px-5 py-4 transition-colors hover:border-gray-200 hover:bg-blue-400/70"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold text-gray-200`}>
-            Test{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm text-gray-200 group-hover:opacity-100 opacity-50`}>
-            Try something out!
           </p>
         </Link>
       </div>

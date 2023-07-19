@@ -1,6 +1,7 @@
 import bgImage from '../../public/darkvillage.webp'
 import level1 from '../../public/level1.png'
 import level2 from '../../public/level2.png'
+import level3 from '../../public/level3.png'
 
 
 export default function Select()
@@ -49,7 +50,7 @@ export default function Select()
                 className="group rounded-lg bg-center border border-gray-900 border-solid px-5 py-4 bg-sky-400/30 transition-colors hover:border-gray-200 hover:bg-sky-400/70"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{backgroundImage: `url(${level1.src})`}}
+                style={{backgroundImage: `url(${level3.src})`}}
                 >
                     <h2 className={`mb-3 mt-20 text-2xl font-semibold text-gray-200`}>
                         Level 3: Challenge{' '}
