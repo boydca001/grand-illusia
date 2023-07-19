@@ -160,8 +160,8 @@ const actionDict = {
             var scene = tile.tilemap.scene;
             var fx = scene.add.particles(unit.image.x, unit.image.y - 30, 'watersphere', {
                 /*frame: 'watersphere',*/
-                lifespan: 2000,
-                speed: { min: 200, max: 200 },
+                lifespan: 500,
+                speed: { min: 75, max: 100 },
                 scale: { start: 0.7, end: 0},
                 blendMode: 'ADD'
             });
