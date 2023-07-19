@@ -20,7 +20,7 @@ class MapUnit
     constructor(unitName: string, xIn:number, yIn:number, img:Phaser.GameObjects.Sprite)
     {
         //there's nothing actually wrong with the below line, typescript is just being weird
-        this.props = Object.assign(Object.create(Object.getPrototypeOf(UnitDict[unitName])), UnitDict[unitName]);
+        this.props = Object.assign(Object.create(Object.getPrototypeOf(UnitDict[unitName as keyof typeof UnitDict])), UnitDict[unitName as keyof typeof UnitDict]);
         //this.props.setp
         if (this.props == null || this.props == undefined)
         {
@@ -49,7 +49,7 @@ class MapUnit
         var routeSliced = route.slice(0, 4);
         //construct the individual tweens that will make up the timeline
         //there's again no real issue with the below line, but phaser doesn't provide a usable type for tween configs
-        var tweens = [];
+        var tweens : Phaser.Types.Tweens.TweenBuilderConfig[] = [];
         routeSliced.forEach(element => {
             tweens.push({
                 targets: this.image,

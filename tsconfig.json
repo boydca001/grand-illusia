@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/login.tsx", "src/resources/scenes/preloader.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/login.tsx", "src/resources/scenes/preloader1.js", "src/pages/_app.jsx"],
   "exclude": ["node_modules"]
 }

@@ -58,7 +58,7 @@ function SideBar()
 {
     const [showState, setShowState] = useState(false);
 
-    const [scoreData, setScoreData] = useState([]);
+    const [scoreData, setScoreData] = useState<any[]>([]);
     
     async function getScores()
     {
@@ -121,8 +121,8 @@ function SideBar()
         </button>
         <hr></hr>
         {
-        scoreData.map((score, index) => {
-            return <div><li key={index}>#{index + 1}. {score.playerName} - {score.score} points</li><br></br><hr className="bg-pink-900"></hr></div>
+        scoreData.map((score, key) => {
+            return <div key={key}><li>#{key + 1}. {score.playerName} - {score.score} points</li><br></br><hr className="bg-pink-900"></hr></div>
         })
         }
         </div>
