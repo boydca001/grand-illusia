@@ -2,10 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import bgImage from '../../public/darkvillage.webp'
 
-var number1 = 20;
-
-var number2 = 21;
-
 
 export default function Home() {
   return (
@@ -15,7 +11,7 @@ export default function Home() {
         <Image
           className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70]"
           src="/loegoe.png"
-          alt="Next.js Logo"
+          alt="Grand Illusia Logo"
           width={1034*0.75}
           height={756*0.75}
           priority

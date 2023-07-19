@@ -58,7 +58,7 @@ export default class UIScene extends Scene
 
     update()
     {
-        this.scoreCounter.setText("Score: " + (stateManager.score.damageDealt + stateManager.score.timeBonus + stateManager.score.damageTaken + stateManager.score.effectiveHits))
+        this.scoreCounter.setText("Score: " + (stateManager.score.damageDealt + stateManager.score.damageTaken + stateManager.score.effectiveHits))
         this.turnCounter.setText("Turn " + stateManager.turnCount);
         this.actionCounter.setText("Remaining Actions: " + stateManager.actionCount);
     }

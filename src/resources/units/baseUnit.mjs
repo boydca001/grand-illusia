@@ -81,6 +81,11 @@ export default class Unit
         {
             totalDamage += damageAmount;
         }
+        //always deal at least 1 damage.
+        if ((damageType == 1 || damageType == 2) && damageAmount > 1)
+        {
+            damageAmount = 1;
+        }
         this.hitPoints += totalDamage;
         if (this.hitPoints < 0)
         {

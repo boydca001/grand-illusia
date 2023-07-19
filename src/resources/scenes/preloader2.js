@@ -3,7 +3,7 @@ import { Scene } from "phaser"
 //import MapStuff from './basicMap.json'
 //import Map2 from './basicMap.csv'
 
-export default class Preloader extends Scene
+export default class Preloader1 extends Scene
 {
     constructor()
     {
@@ -12,7 +12,7 @@ export default class Preloader extends Scene
     preload()
     {
         //BASE GAME ASSETS START ---
-        this.load.image('grasstile', 'assets/TILE.png');
+        this.load.image('tiles_in', 'assets/dirt_tile.png');
         this.load.image('pointer', 'assets/indicator.png');
         this.load.image('target', 'assets/target.png');
         //load currently extant unit sprites:
@@ -37,7 +37,7 @@ export default class Preloader extends Scene
 
         //console.log(Loader. + Loader.path);
         //choose what map you want by loading a different .json here.
-        var tests = this.load.tilemapTiledJSON('gameMap', 'basicMap.json');
+        var tests = this.load.tilemapTiledJSON('gameMap', 'map2.json');
 
         //load the file which holds the HTML for our prompt.
         this.load.html("nameprompt", "prompt.html");
@@ -46,18 +46,38 @@ export default class Preloader extends Scene
         //VARY THIS- contians all information for this level's initial state.
         this.registry.set('startingInfo', [
             {
-                x: 5,
-                y: 8,
+                x: 8,
+                y: 18,
                 name: "Maya",
                 side: 1
             },
             {
                 x: 5,
-                y: 3,
+                y: 18,
+                name: "Ivene",
+                side: 1
+            },
+            {
+                x: 7,
+                y: 8,
                 name: "Slime",
                 side: 0
             },
+            {
+                x: 11,
+                y: 10,
+                name: "Slime",
+                side: 0
+            },
+            {
+                x: 2,
+                y: 10,
+                name: "Slime",
+                side: 0
+            }
         ])
+        this.registry.set('cameraPos', {x: 6, y: 16});
+        this.registry.set('levelNum', 2);
 
     }
     create()

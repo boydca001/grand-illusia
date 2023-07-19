@@ -20,7 +20,8 @@ class MapUnit
     constructor(unitName: string, xIn:number, yIn:number, img:Phaser.GameObjects.Sprite)
     {
         //there's nothing actually wrong with the below line, typescript is just being weird
-        this.props = UnitDict[unitName];
+        this.props = Object.assign(Object.create(Object.getPrototypeOf(UnitDict[unitName])), UnitDict[unitName]);
+        //this.props.setp
         if (this.props == null || this.props == undefined)
         {
             throw new Error("Failed to create a unit of type '"+unitName+"'.");

@@ -21,15 +21,17 @@ export default class Arenamap extends Scene
 
     create()
     {
-        //const tile = this.add.image(100, 100, 'grasstile');
+        // tell the state manager what level we're on
+        stateManager.level = this.registry.get('levelNum');
 
-        //this doesn't work and just constructs an generic empty map
+
+        //Create our tilemap
         this.map = this.make.tilemap({key: 'gameMap'});
-        //shown from this
-        console.log(this.map);
-        const tileset = this.map.addTilesetImage('JustGrass', 'grasstile');
+
+        //console.log(this.map);
+        const tileset = this.map.addTilesetImage('map_tiles', 'tiles_in');
         console.log(tileset);
-        //...however, this DOES show the correct information.
+        // Connect the tileset to the map so it renders
         console.log(this.cache.tilemap.get('gameMap'));
 
         const layer = this.map.createLayer('toplayer', tileset, 0, 0);
@@ -39,7 +41,8 @@ export default class Arenamap extends Scene
         //center map??
         this.camXOffset = ((this.cameras.main.displayWidth)/2);
         this.camYOffset = (this.cameras.main.displayHeight)/2;
-        const centerTile = layer.getTileAt(5,6);
+        var regCenter = this.registry.get('cameraPos')
+        const centerTile = layer.getTileAt(regCenter.x,regCenter.y);
 
         //this.cameras.main.setScroll(centerTile.x - this.camXOffset,centerTile.y - this.camYOffset);
 
@@ -117,11 +120,20 @@ export default class Arenamap extends Scene
         //select a random enemy unit that can act.
         var unitsCanAct = [];
         unitManager.enemyUnits.forEach(element => {
-            if (element.canAct && element.props.hitPoints > 0)
+            if (element.canAct && element.props.hitPoints > 0 && !element.hasPassed)
             {
                 unitsCanAct.push(element);
             }
         });
+
+
+        if (unitsCanAct.length == 0)
+        {
+            //...All enemy units are either dead or passed their turn, so let's just end their turn.
+            stateManager.actionCount = 0;
+            this.postAction(this.targetingUnit);
+            return;
+        }
 
 
         //randomly choose one.
@@ -150,11 +162,14 @@ export default class Arenamap extends Scene
         });
         console.log("Selected: " + activeAlly.props.name);
         //step 1. choose randomly the ability you'd like to use.
-        var chosenSkill = this.targetingUnit.props.skills[(Math.random() * (this.targetingUnit.props.skills.length - 1))];
+        var randomInRange = (Math.random() * (this.targetingUnit.props.skills.length - 1));
+        var chosenSkill = this.targetingUnit.props.skills[Math.round(randomInRange)];
 
         //step 2. is the target in range? every range in this game is diamond-shaped insofar, so we can just use manhattan distance.
         distance = Math.abs(this.targetingUnit.pos.x - activeAlly.pos.x) + Math.abs(this.targetingUnit.pos.y - activeAlly.pos.y);
 
+        console.log(this.targetingUnit.props.skills.length);
+        console.log(chosenSkill);
         if (distance <= actionDict[chosenSkill].range)
         {
             //we are in range now, so just use the skill and end your turn
@@ -282,6 +297,24 @@ export default class Arenamap extends Scene
     {
         unit.canAct = false;
         //any other things that may need to be resolved here
+
+        //after every action, check if any unit has been defeated and tint them a dark color to indicate that.
+        unitManager.allyUnits.forEach((element) => {
+            if (element.props.hitPoints == 0)
+            {
+                element.image.setTint(0x404040);
+                element.canAct = false;
+                element.canMove = false;
+            }
+        })
+        unitManager.enemyUnits.forEach((element) => {
+            if (element.props.hitPoints == 0)
+            {
+                element.image.setTint(0x404040);
+                element.canAct = false;
+                element.canMove = false;
+            }
+        })
         stateManager.actionCount -= 1;
         stateManager.checkState();
     }

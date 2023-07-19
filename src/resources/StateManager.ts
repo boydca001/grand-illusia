@@ -3,14 +3,14 @@ import unitManager from "./unitManager";
 import eventManager from "./scenes/eventManager";
 const axios = require('axios').default;
 
-async function sendScore(name:string)
+async function sendScore(name:string, levelNum: number)
 {
     try
     {
         const response = await axios.post('api/scoreSave', {
             "playerName" : name,
             "score" : stateManager.score.damageDealt + stateManager.score.damageTaken + stateManager.score.effectiveHits + stateManager.score.timeBonus,
-            "level" : 1
+            "level" : levelNum
         })
         console.log(response);
     }
@@ -30,6 +30,7 @@ class StateManager
     public inAnimation: boolean = false;
     public gameOver: boolean = false;
     public turnCount: number = 0;
+    public level: number = 0;
     public score = {
         damageDealt : 0,
         damageTaken : 0,
@@ -43,7 +44,7 @@ class StateManager
 
     sendPlayerScore(name:string)
     {
-        sendScore(name);
+        sendScore(name, this.level);
     }
 
     checkState()
@@ -80,6 +81,11 @@ class StateManager
             //do ending things
             stateManager.gameOver = true;
             eventManager.emit('gameEnd', this.victoryState);
+            this.score.timeBonus = 50 - (this.turnCount * 5);
+            if (this.score.timeBonus < 0)
+            {
+                this.score.timeBonus = 0;
+            }
             return;
         }
 
@@ -104,9 +110,9 @@ class StateManager
                 });
             }
         }
-
-        // if no actions are remaining, switch turns
-        if (this.actionCount < 1)
+        var currentTeam
+        // if no actions are remaining, or if all units have chosen to pass, switch turns
+        if (this.actionCount < 1 || (this.isPlayerTurn && !unitManager.allyUnits.find(x => x.hasPassed == false)) || (!this.isPlayerTurn && !unitManager.enemyUnits.find(x => x.hasPassed == false)))
         {
             if (this.isPlayerTurn)
             {

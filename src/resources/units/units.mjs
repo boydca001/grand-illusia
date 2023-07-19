@@ -43,6 +43,66 @@ let UnitDict =
         ['Water Sphere']
     ),
 
+    "Stollen" : new Unit(
+        "Stollen",
+        50,
+        50,
+        100,
+        100,
+        1,
+        5,
+        1,
+        2,
+        8,
+        1,
+        10,
+        2,
+        2,
+        2,
+        "A happy, green slime that was inspired by Maya's efforts and wants to help her. His stats are all around pretty low, except his HP and defensive stats.",
+        ["Bounce"]
+    ),
+
+    "Power Monolith" : new Unit(
+        "Power Monolith",
+        50,
+        50,
+        100,
+        100,
+        1,
+        20,
+        5,
+        8,
+        9,
+        1,
+        1,
+        2,
+        2,
+        2,
+        "A powerful animated construct that guards a certain place. It radiates an aura of strength.",
+        ["Strike"]
+    ),
+
+    "Mind Monolith" : new Unit(
+        "Mind Monolith",
+        50,
+        50,
+        100,
+        100,
+        1,
+        20,
+        5,
+        3,
+        1,
+        3,
+        15,
+        2,
+        2,
+        2,
+        "A powerful animated construct that radiates a powerful Force. Somehow, it can use offensive magic.",
+        ["Strike", "Water Sphere"]
+    ),
+
     "Slime" : new Unit (
         "Slime",
         25,

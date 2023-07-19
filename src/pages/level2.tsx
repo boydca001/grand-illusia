@@ -14,7 +14,7 @@ function GameThing()
         async function init()
         {
             const Phaser = await import('phaser');
-            const { default: Preloader } = await import('../resources/scenes/preloader.js');
+            const { default: Preloader2 } = await import('../resources/scenes/preloader2.js');
             const { default: Arenamap } = await import('../resources/scenes/arenamap.js');
             const { default: UIScene } = await import('../resources/scenes/UIScene.js')
 
@@ -24,7 +24,7 @@ function GameThing()
                     parent: "gameSpot",
                     scene:
                     [
-                        Preloader,
+                        Preloader2,
                         Arenamap,
                         UIScene
                     ],
@@ -62,7 +62,7 @@ function SideBar()
     
     async function getScores()
     {
-        const res = await fetch('api/scoreSave?level=1')
+        const res = await fetch('api/scoreSave?level=2')
         .then((response) => response.json())
         .then((scores) => {
             //console.log(scores.rows);
@@ -92,23 +92,16 @@ function SideBar()
                     Toggle Info/Scores
                 </button>
                 <div className="pl-2">
-                This is the tutorial level for Grand Illusia!
+                Welcome to Level 2
 
-                <li>You control the girl in the green dress, Maya. The objective is to defeat the blue slime on the other side of the map!</li>
+                <li>You may have noticed that whenever a character passes their turn, half of an action point is restored.</li>
 
-                <li>You can tell if a character is on your side by selecting them. A character you control has multiple options, while only an enemy's stats are visible.</li>
+                <li>A character who Passed their turn cannot act again untiul the next round, but they can provide inspiration to their more active allies to act again!</li>
 
-                From top to bottom on the selection menu:
+                If you had three allies, you could allow a unit to act twice. These slimes will use that tactic if only one of them reaches you.
+                Defeat them all before you are overwhelmed!
                 <hr/>
-                <li className="text-base">Action: Use a skill that the character knows. Maya can perform the basic Strike skill. A character can normally do only one action.</li>
-                <hr/>
-                <li className="text-base">Move: Move a character up to 4 tiles away. This doesn't cost an action, but must be done before you choose an action.</li>
-                <hr/>
-                <li className="text-base">Status: Check a character's status. Helpful for finding out what a character's talents are.</li>
-                <hr/>
-                <li className="text-base">Pass: Expend an action without doing anything. This character cannot act until the next turn.</li>
-                <hr/>
-                Your score is based on how you performed in combat. Try to defeat enemies quickly, and deal as much damage as you can!
+                <li className="text-base">Ivene has joined your side. He knows a powerful magical Skill that can be used from four tiles away. Use it to your advantage!</li>
                 </div>
             </div>
         )
