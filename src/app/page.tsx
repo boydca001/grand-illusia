@@ -2,10 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import bgImage from '../../public/darkvillage.webp'
 
-var number1 = 20;
-
-var number2 = 21;
-
 
 export default function Home() {
   return (
@@ -15,7 +11,7 @@ export default function Home() {
         <Image
           className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70]"
           src="/loegoe.png"
-          alt="Next.js Logo"
+          alt="Grand Illusia Logo"
           width={1034*0.75}
           height={756*0.75}
           priority
@@ -43,13 +39,13 @@ export default function Home() {
         </a>
 
         <Link
-          href="/about"
+          href="/select"
           className="group rounded-lg border border-gray-900 border-transparent bg-blue-400/30 px-5 py-4 transition-colors hover:border-gray-200 hover:bg-blue-400/70"
           target="_blank"
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold text-gray-200`}>
-            Log in{' '}
+            Play{' '}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
