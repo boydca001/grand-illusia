@@ -92,7 +92,7 @@ function SideBar()
                     Toggle Info/Scores
                 </button>
                 <div className="pl-2">
-                Welcome to Level 2
+                Welcome to the final stage!
 
                 <li>Don't forget to check the various characters and enemies' stats!</li>
 
