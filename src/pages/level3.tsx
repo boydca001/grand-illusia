@@ -94,14 +94,14 @@ function SideBar()
                 <div className="pl-2">
                 Welcome to Level 2
 
-                <li>You may have noticed that whenever a character passes their turn, half of an action point is restored.</li>
+                <li>Don't forget to check the various characters and enemies' stats!</li>
 
-                <li>A character who Passed their turn cannot act again untiul the next round, but they can provide inspiration to their more active allies to act again!</li>
+                <li>Physical attacks are reduced by Defense, and Magical attacks are reduced by Spirit.</li>
+                Likewise, Physical attacks are powered by Atttack and Magical attacks are powered by Force.
 
-                If you had three allies, you could allow a unit to act twice. These slimes will use that tactic if only one of them reaches you.
-                Defeat them all before you are overwhelmed!
+                Use what you've learned in the previous to decide the correct approach on defeating these two powerful enemies!
                 <hr/>
-                <li className="text-base">Ivene has joined your side. He knows a powerful magical Skill that can be used from four tiles away. Use it to your advantage!</li>
+                <li className="text-base">Stollen, a friendly green slime, has joined your side. Although he cannot attack very well, he is incredibly resilient! Use this to your advantage.</li>
                 </div>
             </div>
         )
