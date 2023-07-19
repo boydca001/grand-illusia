@@ -1,6 +1,5 @@
 // Definition for the baseline for a unit. The definition of every unit in the game follows this pattern.
 
-
 export default class Unit 
 {
     name;
@@ -64,23 +63,30 @@ export default class Unit
         this.skills = skills;
     }
     //Generic handler for taking damage, but really just manipulates HP. key: 0 = healing | 1 = physdamage | 2 = magicdamage
-    takeDamage(damageType, damageAmount, damageElem = 0) 
+    //Currently element is unused, as multiple types of spell do not exist yet!
+    takeDamage(damageType, damageAmount, damageElem = 0)
     {
-        totalDamage = damageAmount;
+        var totalDamage = 0;
         //manipulate the above if elemental weaknesses ever becomes a thing
 
         if (damageType == 1)
         {
-            this.hitPoints -= (damageAmount - defense);
+            totalDamage -= (damageAmount - this.defense);
         }
         if (damageType == 2)
         {
-            this.hitPoints -= (damageAmount - spirit);
+            totalDamage -= (damageAmount - this.spirit);
         }
         if (damageType == 0)
         {
-            this.hitPoints += damageAmount;
+            totalDamage += damageAmount;
         }
+        this.hitPoints += totalDamage;
+        if (this.hitPoints < 0)
+        {
+            this.hitPoints = 0;
+        }
+        return totalDamage;
     };
 
     //MP manipulation. Fairly straightforward, can be used to increase or decrease mana.

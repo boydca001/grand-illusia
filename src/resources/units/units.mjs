@@ -22,6 +22,27 @@ let UnitDict =
         + "well-rounded character with no significant strengths or flaws."
     ),
 
+    "Ivene" : new Unit(
+        "Ivene",
+        30,
+        30,
+        100,
+        100,
+        1,
+        3,
+        3,
+        2,
+        1,
+        7,
+        5,
+        3,
+        3,
+        3,
+        "An intelligent boy from the college in Maya's town. Although his physical stats are low, he has very high Force and Spirit."
+        + "His magic attacks are quite potent.",
+        ['Water Sphere']
+    ),
+
     "Slime" : new Unit (
         "Slime",
         25,

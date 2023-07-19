@@ -38,11 +38,11 @@ export function tileSearch(startTile, endTile)
                 output.push(curTile.tile);
                 curTile = curTile.p;
             }
-            console.log("We have arrivedd at our destination.");
+            //console.log("We have arrived at our destination.");
             return output.reverse();
         }
-        console.log(lowestF);
-        console.log("Searching around " + lowestF.tile.x + ", " + lowestF.tile.y);
+        //console.log(lowestF);
+        //console.log("Searching around " + lowestF.tile.x + ", " + lowestF.tile.y);
 
         //normal case - remove it from the open list..
         openList.splice(openList.indexOf(lowestF), 1);
@@ -55,7 +55,7 @@ export function tileSearch(startTile, endTile)
         neighbors.forEach(element => {
             //check if this tile contains a unit of the opposing side
             var obstructed = false;
-            console.log(element);
+            //console.log(element);
             if (element !=null)
             {
                 var neighborUnit = unitManager.findAt(element.x, element.y);
@@ -96,13 +96,13 @@ export function tileSearch(startTile, endTile)
                 var gScore = lowestF.g + 1;
                 var gIsBest = false;
                 var openSearch = openList.find(x => x.tile === element);
-                console.log(openSearch);
+                //console.log(openSearch);
                 if(!openSearch)
                 {
                     //if this element DOESN'T exist in the open list, add it to the openlist.
                     openList.push(toAdd);
                     toAdd.h = distanceFrom(toAdd.tile, endTile);
-                    console.log("Adding to list.");
+                    //console.log("Adding to list.");
                     gIsBest = true;
                 }
                 else
@@ -168,7 +168,7 @@ export function moveDistance(startTile, endTile)
             return lowestF.g;
         }
         console.log(lowestF);
-        console.log("Searching around " + lowestF.tile.x + ", " + lowestF.tile.y);
+        //console.log("Searching around " + lowestF.tile.x + ", " + lowestF.tile.y);
 
         //normal case - remove it from the open list..
         openList.splice(openList.indexOf(lowestF), 1);
@@ -192,13 +192,13 @@ export function moveDistance(startTile, endTile)
                 var gScore = lowestF.g + 1;
                 var gIsBest = false;
                 var openSearch = openList.find(x => x.tile === element);
-                console.log(openSearch);
+                //console.log(openSearch);
                 if(!openSearch)
                 {
                     //if this element DOESN'T exist in the open list, add it to the openlist.
                     openList.push(toAdd);
                     toAdd.h = distanceFrom(toAdd.tile, endTile);
-                    console.log("Adding to list.");
+                    //console.log("Adding to list.");
                     gIsBest = true;
                 }
                 else
@@ -225,7 +225,7 @@ export function moveDistance(startTile, endTile)
     }
     //if we get this far in the function, i have either fucked up, or there is genuinely NO path from startTile to endTile.
     //return an empty array.
-    console.log("I MAY have fucked up.");
+    console.log("No path could be found to the destination tile.");
     return [];
 }
 
@@ -265,10 +265,10 @@ export function getTilesInRadius(startTile, ranges, layer)
     for (let index = 0; index < xcounter; index++) {
         for (let index2 = (Math.abs(yspread) - ranges) + 1; index2 < (ranges - Math.abs(yspread)); index2++) {
             var curTile = layer.getTileAt((xstart + (ranges - 1) - index), (ystart + index2));
-            console.log("Value offsets: " + index + ", " + yspread);
+            //console.log("Value offsets: " + index + ", " + yspread);
             if (curTile == null)
             {
-                console.log("No tile at " + (xstart + (ranges - 1) - index) + ", " + (ystart + index2) + ".")
+                //console.log("No tile at " + (xstart + (ranges - 1) - index) + ", " + (ystart + index2) + ".")
             }
             else
             {

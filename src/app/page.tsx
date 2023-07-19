@@ -43,13 +43,13 @@ export default function Home() {
         </a>
 
         <Link
-          href="/about"
+          href="/select"
           className="group rounded-lg border border-gray-900 border-transparent bg-blue-400/30 px-5 py-4 transition-colors hover:border-gray-200 hover:bg-blue-400/70"
           target="_blank"
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold text-gray-200`}>
-            Log in{' '}
+            Play{' '}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>

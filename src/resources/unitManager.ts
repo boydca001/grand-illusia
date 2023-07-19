@@ -15,11 +15,12 @@ class MapUnit
     }
     public canAct:boolean = true;
     public canMove:boolean = true;
+    public hasPassed:boolean = false;
     public image:Phaser.GameObjects.Sprite;
     constructor(unitName: string, xIn:number, yIn:number, img:Phaser.GameObjects.Sprite)
     {
         //there's nothing actually wrong with the below line, typescript is just being weird
-        this.props = {...UnitDict[unitName]};
+        this.props = UnitDict[unitName];
         if (this.props == null || this.props == undefined)
         {
             throw new Error("Failed to create a unit of type '"+unitName+"'.");
@@ -33,13 +34,20 @@ class MapUnit
         };
     }
 
+
     moveTo(destTile: Phaser.Tilemaps.Tile)
     {
         var startTile = destTile.tilemap?.getTileAt(this.pos.x, this.pos.y);
         var route = tileSearch(startTile, destTile);
+        //if the route doesn't exist, don't continue.
+        if (route.length == 0)
+        {
+            return;
+        }
         //everyone's move distance is 4.
         var routeSliced = route.slice(0, 4);
         //construct the individual tweens that will make up the timeline
+        //there's again no real issue with the below line, but phaser doesn't provide a usable type for tween configs
         var tweens = [];
         routeSliced.forEach(element => {
             tweens.push({
@@ -52,9 +60,15 @@ class MapUnit
         });
         var timeline = this.image.scene.tweens.chain({tweens: tweens,
         onComplete: () => {stateManager.inAnimation = false;
-        eventManager.emit("completeAIturn")}});
+        //if it's the AI's turn, let them know that they should check if they should try to act after they've moved.
+            if(!stateManager.isPlayerTurn)
+            {
+                eventManager.emit("completeAIturn");
+            }
+        }});
         this.pos.x = routeSliced[routeSliced.length - 1].x;
         this.pos.y = routeSliced[routeSliced.length - 1].y;
+        this.canMove = false;
     }
 }
 //ar testvar:Unit = new Unit({...UnitDict["Maya"]});
@@ -93,7 +107,7 @@ class UnitManager
         this.allyUnits.forEach(element => {
             if (element.pos.x == x && element.pos.y == y)
             {
-                console.log("Allied unit " + element.props.name + " found at " + x + ", " + y + ".");
+                //console.log("Allied unit " + element.props.name + " found at " + x + ", " + y + ".");
                 foundUnit = element;
 
             }
@@ -101,13 +115,13 @@ class UnitManager
         this.enemyUnits.forEach(element => {
             if (element.pos.x == x && element.pos.y == y)
             {
-                console.log("Enemy unit " + element.props.name + " found at " + x + ", " + y + ".");
+                //console.log("Enemy unit " + element.props.name + " found at " + x + ", " + y + ".");
                 foundUnit = element;
             }
         });
         if (foundUnit == null) 
         {
-            console.log("No unit found at " + x + ", " + y + ".");
+            //console.log("No unit found at " + x + ", " + y + ".");
             return 0;
         }
         else

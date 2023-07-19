@@ -5,8 +5,6 @@ import { tileSearch, getTilesInRadius, moveDistance } from "@/resources/TileSear
 import eventManager from "./eventManager";
 import actionDict from "../units/actions.mjs";
 
-
-
 export default class Arenamap extends Scene
 {
     constructor()
@@ -26,13 +24,13 @@ export default class Arenamap extends Scene
         //const tile = this.add.image(100, 100, 'grasstile');
 
         //this doesn't work and just constructs an generic empty map
-        this.map = this.make.tilemap({key: 'basicMap'});
+        this.map = this.make.tilemap({key: 'gameMap'});
         //shown from this
         console.log(this.map);
         const tileset = this.map.addTilesetImage('JustGrass', 'grasstile');
         console.log(tileset);
         //...however, this DOES show the correct information.
-        console.log(this.cache.tilemap.get('basicMap'));
+        console.log(this.cache.tilemap.get('gameMap'));
 
         const layer = this.map.createLayer('toplayer', tileset, 0, 0);
         //this.cameras.main.setBounds(0,0, map.widthInPixels, map.heightInPixels, true);
@@ -60,10 +58,26 @@ export default class Arenamap extends Scene
         this.indic.setPosition(centerTile.getCenterX(),centerTile.getCenterY());
 
         //create allies
-        unitManager.addUnit(this, this.map, 5, 5, "Maya", 1);
+        //unitManager.addUnit(this, this.map, 5, 5, "Maya", 1);
+        //unitManager.addUnit(this, this.map, 5, 6, "Ivene", 1);
 
         //create enemies
-        unitManager.addUnit(this, this.map, 5, 2, "Slime", 0);
+        //unitManager.addUnit(this, this.map, 5, 2, "Slime", 0);
+        //unitManager.addUnit(this, this.map, 7, 2, "Slime", 0);
+
+        //Create units based on information provided by the preloader
+        var initalUnits = this.registry.get('startingInfo');
+        if (initalUnits == undefined)
+        {
+            throw new Error("Did not recieve a set of starting positions from preloader. Ensure this happens before the game loads.");
+        }
+        else
+        {
+            console.log(initalUnits);
+            initalUnits.forEach(element => {
+                unitManager.addUnit(this, this.map, element.x, element.y, element.name, element.side);
+            });
+        }
 
         //listener for clicking around
         this.input.on('pointerdown', this.goToClickedTile, this);
@@ -87,6 +101,8 @@ export default class Arenamap extends Scene
         //listener to resolve any post-action events
         eventManager.on('afterAction', this.postAction)
 
+        eventManager.on('passTurn', this.passTurn, this);
+
         eventManager.on('ai_turn', this.AIAction, this);
 
         this.selectGroup = this.add.group({defaultKey: 'ui_prompt', classType: Phaser.GameObjects.Image});
@@ -101,7 +117,7 @@ export default class Arenamap extends Scene
         //select a random enemy unit that can act.
         var unitsCanAct = [];
         unitManager.enemyUnits.forEach(element => {
-            if (element.canAct)
+            if (element.canAct && element.props.hitPoints > 0)
             {
                 unitsCanAct.push(element);
             }
@@ -112,15 +128,8 @@ export default class Arenamap extends Scene
         this.targetingUnit = unitsCanAct[Math.floor(Math.random() * unitsCanAct.length)];
 
         //move the camera here, to focus attention.
-        this.tweens.add(
-            {
-                targets: this.cameras.main,
-                scrollX: this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y).getCenterX() - this.camXOffset,
-                scrollY: this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y).getCenterY() - this.camYOffset,
-                duration: 500,
-                ease : 'quad'
-            }
-        )
+        var enemyPos = this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y);
+        this.panCamera(enemyPos.getCenterX(), enemyPos.getCenterY());
 
         //as i've not coded in any support abilities yet, so the ai will always take the aggressive approach.
         //find nearest ally.
@@ -151,10 +160,7 @@ export default class Arenamap extends Scene
             //we are in range now, so just use the skill and end your turn
             var startingTile = this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y);
             var targetsTile = this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y);
-            var indicator = this.selectGroup.get(startingTile.getCenterX(), startingTile.getCenterY())
-            indicator.setTexture('target');
-            indicator.visible = true;
-            indicator.active = true;
+            var indicator = this.createSprite(startingTile.getCenterX(), startingTile.getCenterY(), 'target');
             var moveIndicator = this.tweens.add({
                 targets: indicator,
                 x: targetsTile.getCenterX(),
@@ -173,9 +179,7 @@ export default class Arenamap extends Scene
         else
         {
             //we are not in range, so try to get there
-            //find path to the target
-            var fullPath = tileSearch(this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y), this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y));
-            //now, find all tiles that would allow you to be in range
+            //find all tiles that would allow you to be in range
             var allTilesInRange = getTilesInRadius(this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y), actionDict[chosenSkill].range, this.map);
             //filter out occupied tiles
             var openTiles = [];
@@ -191,47 +195,72 @@ export default class Arenamap extends Scene
                 }
                 
             });
+
+            //find path to the target. Out of all of our possible valid endpoints to use our skill, find the path to the shortest one.
+            var fullPath = [];
+            openTiles.forEach(element => {
+                var tempPath = tileSearch(this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y), element);
+                if (tempPath.length < fullPath.length || fullPath.length == 0)
+                {
+                    fullPath = tempPath;
+                }
+            });
             var willBeInRange = false;
             //since all units have a move distance of 4, we only ever use the first four entries of fullPath
             var path = fullPath.slice(0,4);
-            //if we would arrive in range before travelling this full distance, then shorten the path.
-            for (let index = 0; index < 2; index++) {
-                if (openTiles.includes(path[index]))
+            //if we would arrive in range before travelling this full distance, then shorten the path - but only if no one is standing there.
+            for (let index = 0; index < 3; index++) {
+                //console.log(unitManager.findAt(path[index].x, path[index].y));
+                if (openTiles.includes(path[index]) && unitManager.findAt(path[index].x, path[index].y) == 0)
                 {
+                    console.log("Good to go???")
                     path = path.slice(0, index + 1);
                     willBeInRange = true;
                     break;
                 }
             }
+            path.forEach(element => {
+                if (openTiles.includes(element) && unitManager.findAt(element.x, element.y) == 0                                                                                                                                                                                            )
+                {
+                    console.log("Good to go???")
+                    willBeInRange = true;
+                }
+            });
+            console.log(openTiles);
+            console.log(path);
             //temporary- just display the path.
             path.forEach(element => {
-                element = this.selectGroup.get(element.getCenterX(), element.getCenterY(), 'target')
-                element.setTexture('target');
-                element.visible = true;
-                element.active = true;
+                element = this.createSprite(element.getCenterX(), element.getCenterY(), 'target');
             });
             this.time.delayedCall(900, () => {
                 this.flushSelectGroup();
-
                 this.targetingUnit.moveTo(path[path.length - 1]);
+
                 var startingTile = this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y);
                 var targetsTile = this.map.getTileAt(activeAlly.pos.x, activeAlly.pos.y);
                 eventManager.once("completeAIturn", () => {
-                    var indicator = this.selectGroup.get(startingTile.getCenterX(), startingTile.getCenterY())
-                    indicator.setTexture('target');
-                    indicator.visible = true;
-                    indicator.active = true;
+                    //if we won't get close enough to use our chosen skill in the first place, use the Pass skill and exit this routine.
+                    if (!willBeInRange)
+                    {
+                        console.log("Still out of range. Passing.");
+                        actionDict['Pass'].activate(targetsTile, this.targetingUnit);
+                        return;
+                    }
+                    var newpos = this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y);
+                    this.panCamera(newpos.getCenterX(), newpos.getCenterY());
+                    var indicator = this.createSprite(startingTile.getCenterX(), startingTile.getCenterY(), 'target');
                     var moveIndicator = this.tweens.add({
                         targets: indicator,
                         x: targetsTile.getCenterX(),
                         y: targetsTile.getCenterY(),
-                        delay: 300,
-                        duration: 200,
+                        delay: 600,
+                        duration: 300,
                         completeDelay: 1200,
                         ease: 'elastic'
 
                     })
                     moveIndicator.once('complete', () => {
+                        this.flushSelectGroup();
                         console.log("Doing " + chosenSkill);
                         actionDict[chosenSkill].activate(targetsTile, this.targetingUnit);
                     })
@@ -242,20 +271,25 @@ export default class Arenamap extends Scene
 
     }
 
+    // Helper function to allow the player to voluntarily pass their turn.
+    passTurn(unit)
+    {
+        var tile = this.map.getTileAt(unit.pos.x, unit.pos.y);
+        actionDict['Pass'].activate(tile, unit);
+    }
+
     postAction(unit)
     {
         unit.canAct = false;
         //any other things that may need to be resolved here
+        stateManager.actionCount -= 1;
         stateManager.checkState();
     }
 
     highlightSelection(tiles)
     {
         tiles.forEach(element => {
-            var targetTile = this.selectGroup.get(element.getCenterX(), element.getCenterY(), 'target');
-            targetTile.setTexture('target');
-            targetTile.visible = true;
-            targetTile.active = true;
+            var targetTile = this.createSprite(element.getCenterX(), element.getCenterY(), 'target');
             targetTile.setScrollFactor(1);
             targetTile.setScale(1);
             targetTile.disableInteractive();
@@ -284,6 +318,11 @@ export default class Arenamap extends Scene
         this.addCancelButton(actingUnit);
     }
 
+    changeTurn(whosTurn)
+    {
+        
+    }
+
     syncMenu(menuStatus)
     {
         this.menuOn = menuStatus;
@@ -296,28 +335,42 @@ export default class Arenamap extends Scene
 
     goToClickedTile()
     {
-        // effectively disable this entire function if the UI scene is doing something, or if an animation is resolving.
-        if(this.menuOn || stateManager.inAnimation)
+        // effectively disable this entire function if the UI scene is doing something, or if an animation is resolving. Or if the game is over.
+        if(this.menuOn || stateManager.inAnimation || stateManager.gameOver)
         {
             return;
         }
+
+        
 
         //if we're set to move, use this set of logic
         if (stateManager.selectMove)
         {
             var targetTile = this.map.getTileAtWorldXY(this.input.activePointer.worldX, this.input.activePointer.worldY + 32);
-            //if this is the tile we're ALREADY standing on, ignore this.
-            if (targetTile == this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y))
+            //if this is the tile we're ALREADY standing on, ignore this. Also ignore off-map clicks.
+            if (targetTile == this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y) || targetTile == null)
+            {
+                return;
+            }
+            // do not allow the player to move a unit onto a tile a unit is already standing.
+            if (unitManager.findAt(targetTile.x, targetTile.y) != 0)
             {
                 return;
             }
             //if we clicked a tile in range, go there
             if (this.targetedTiles.includes(targetTile))
             {
+                var route = tileSearch(this.map.getTileAt(this.targetingUnit.pos.x, this.targetingUnit.pos.y), targetTile);
+                //if the route doesn't exist, don't continue.
+                if (route.length == 0)
+                {
+                    return;
+                }
+                this.targetingUnit.moveTo(targetTile);
+                this.targetingUnit.canMove = false;
                 console.log("Time to move.")
                 stateManager.selectMove = false;
-                stateManager.inAnimation = true;
-                this.targetingUnit.moveTo(targetTile);
+                stateManager.inAnimation = true;    
 
                 //clean up the UI. TODO: abstract all calls to do this into a function so there isn't as much repeated code
                 this.flushSelectGroup();
@@ -364,16 +417,9 @@ export default class Arenamap extends Scene
         else
         {
             console.log("Going to tile (" + targetTile.x + ", " + targetTile.y + ") at " + targetTile.pixelX + ", " + targetTile.pixelY + "(cursor at " +  this.input.activePointer.worldX +", " + this.input.activePointer.worldY+ ")");
-            //this.cameras.main.setScroll(targetTile.getCenterX() - this.camXOffset, targetTile.getCenterY() - this.camYOffset);
-            this.tweens.add(
-                {
-                    targets: this.cameras.main,
-                    scrollX: targetTile.getCenterX() - this.camXOffset,
-                    scrollY: targetTile.getCenterY() - this.camYOffset,
-                    duration: 500,
-                    ease : 'quad'
-                }
-            )
+
+            this.panCamera(targetTile.getCenterX(), targetTile.getCenterY());
+            
             this.tweens.add(
                 {
                     targets: this.indic,
@@ -442,37 +488,21 @@ export default class Arenamap extends Scene
     addCancelButton(returnUnit)
     {
         //create a cancel button
-        var cancel = this.selectGroup.get(300, 200, 'ui_prompt');
-        cancel.setTexture('ui_prompt');
-        cancel.visible = true;
-        cancel.active = true;
+        var cancel = this.createSprite(300, 200, 'ui_prompt', true);
         cancel.setScrollFactor(0);
         cancel.setScale(2);
-        cancel.setInteractive();
-        var cancelImg = this.selectGroup.get(300,200,'ui_cancel');
-        cancelImg.setTexture('ui_cancel');
-        cancelImg.visible = true;
-        cancelImg.active = true;
+        var cancelImg = this.createSprite(300,200,'ui_cancel');
         cancelImg.setScale(2);
         cancelImg.setScrollFactor(0);
-        cancelImg.disableInteractive(0);
-        console.log(this.selectGroup.getChildren())
         cancel.once('pointerdown', () => {
+            console.log("Cancel button callback.");
             stateManager.selectionMode = false;
             stateManager.selectMove = false;
             this.flushSelectGroup();
 
             //take the camera back to the original unit
             var returnTile = this.map.getTileAt(returnUnit.pos.x, returnUnit.pos.y);
-            this.tweens.add(
-                {
-                    targets: this.cameras.main,
-                    scrollX: returnTile.getCenterX() - this.camXOffset,
-                    scrollY: returnTile.getCenterY() - this.camYOffset,
-                    duration: 500,
-                    ease : 'quad'
-                }
-            )
+            this.panCamera(returnTile.getCenterX(), returnTile.getCenterY());
             
             //go back into the menu.
             eventManager.emit('open-menu', returnUnit);
@@ -488,6 +518,41 @@ export default class Arenamap extends Scene
             this.selectGroup.killAndHide(element);
             element.removeAllListeners();
         });
+    }
+
+    //pans the camera to the position indicated by targetX, targetY.
+    panCamera(targetX, targetY, time = 500, ease = 'quad')
+    {
+        this.tweens.add(
+            {
+                targets: this.cameras.main,
+                scrollX: targetX - this.camXOffset,
+                scrollY: targetY - this.camYOffset,
+                duration: time,
+                ease : ease
+            }
+        )
+    }
+
+    //Creates a sprite on the screen. Defaults to selectGroup for HUD convience, but group may be specified
+    //to use a different one instead.
+    createSprite(x, y, key = '', isInteractive = false, group = this.selectGroup)
+    {
+        var sprite = group.get(x, y, key)
+        // Group.get() does NOT assign any properties other than position if it can acquire an existing
+        // Sprite object. Therefore, all of these properies need to be reset just in case
+        sprite.setTexture(key);
+        sprite.visible = true;
+        sprite.active = true;
+        if (isInteractive)
+        {
+            sprite.setInteractive();
+        }
+        else
+        {
+            sprite.removeInteractive();
+        }
+        return sprite;
     }
     /*
     windows = [];

@@ -1,7 +1,24 @@
 import { ST } from "next/dist/shared/lib/utils";
 import unitManager from "./unitManager";
 import eventManager from "./scenes/eventManager";
+const axios = require('axios').default;
 
+async function sendScore(name:string)
+{
+    try
+    {
+        const response = await axios.post('api/scoreSave', {
+            "playerName" : name,
+            "score" : stateManager.score.damageDealt + stateManager.score.damageTaken + stateManager.score.effectiveHits + stateManager.score.timeBonus,
+            "level" : 1
+        })
+        console.log(response);
+    }
+    catch(error)
+    {
+        console.error(error);
+    }
+}
 class StateManager
 {
     public isPlayerTurn:boolean;
@@ -11,9 +28,22 @@ class StateManager
     public confirmationMode: boolean = false;
     public selectMove: boolean = false;
     public inAnimation: boolean = false;
+    public gameOver: boolean = false;
+    public turnCount: number = 0;
+    public score = {
+        damageDealt : 0,
+        damageTaken : 0,
+        effectiveHits: 0,
+        timeBonus: 0
+    }
     constructor()
     {
         this.isPlayerTurn = false;
+    }
+
+    sendPlayerScore(name:string)
+    {
+        sendScore(name);
     }
 
     checkState()
@@ -48,31 +78,88 @@ class StateManager
         if (this.victoryState != 0)
         {
             //do ending things
+            stateManager.gameOver = true;
+            eventManager.emit('gameEnd', this.victoryState);
             return;
         }
+
+        //if no units can act but action points are still left, re-set the acting status of all units.
+        if(this.isPlayerTurn)
+        {
+            if (!unitManager.allyUnits.find(x => x.canAct == true))
+            {
+                unitManager.allyUnits.forEach(element => {
+                    element.canAct = true;
+                    element.canMove = true;
+                });
+            }
+        }
+        else
+        {
+            if (!unitManager.enemyUnits.find(x => x.canAct == true))
+            {
+                unitManager.enemyUnits.forEach(element => {
+                    element.canAct = true;
+                    element.canMove = true;
+                });
+            }
+        }
+
         // if no actions are remaining, switch turns
         if (this.actionCount < 1)
         {
             if (this.isPlayerTurn)
             {
+                this.turnCount += 1;
                 this.isPlayerTurn = false;
                 console.log("Enemy turn");
+                eventManager.emit('showturnprompt');
                 //refresh everyone's action/movement status
                 unitManager.enemyUnits.forEach(element => {
                     element.canAct = true;
                     element.canMove = true;
+                    element.hasPassed = false;
                 });
+
+                this.actionCount = 0;
+                console.log(this.actionCount);
+                //for every non-defeated enemy, we gain an action point at the start of our turn.
+                unitManager.enemyUnits.forEach((element) => {
+                    if (element.props.hitPoints > 0)
+                    {
+                        this.actionCount += 1;
+                    }
+                })
                 eventManager.emit('ai_turn');
             }
             else
             {
                 this.isPlayerTurn = true;
+                eventManager.emit('showturnprompt');
                 //refresh everyone's action/movement status
                 unitManager.allyUnits.forEach(element => {
                     element.canAct = true;
                     element.canMove = true;
+                    element.hasPassed = false;
                 });
+
+                this.actionCount = 0;
+                //for every non-defeated ally, we gain an action point at the start of our turn.
+                unitManager.allyUnits.forEach((element) => {
+                    if (element.props.hitPoints > 0)
+                    {
+                        this.actionCount += 1;
+                    }
+                })
                 console.log("Player's turn!");
+            }
+        }
+        else
+        {
+            if (!this.isPlayerTurn)
+            {
+                //continue this process again until the AI has used up all of its turns.
+                eventManager.emit('ai_turn');
             }
         }
 
