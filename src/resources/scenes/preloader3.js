@@ -36,7 +36,7 @@ export default class Preloader1 extends Scene
         this.load.image('ui_cancel', 'assets/ui_cancel.png');
         this.load.image('ui_info', 'assets/ui_info.png');
         this.load.image('ui_list', 'assets/ui_list.png');
-        this.load.image('ui_statuswindow', 'assets/ui_statusWindow.png');
+        this.load.image('ui_statuswindow', 'assets/ui_statuswindow.png');
 
         //console.log(Loader. + Loader.path);
         //choose what map you want by loading a different .json here.
