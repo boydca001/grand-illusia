@@ -1,14 +1,27 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 
-## Getting Started
 
-In order to deploy the game, run `npm run dev` or `npm run start` from the main directory.
+## Getting Started
+=======
+![image](public/loegoe.png)
+
+Grand Illusia is a browser-based strategy-RPG for PC, a project currently being made with Next.js in Phaser.
+
+## Compiling and Hosting
+
+In order to deploy the game, run `npm run dev` or `npm run build` from the main directory.
 The scorboard system uses a sqlite3 database, so be certain to run `schema.sql` in the core directory before launching the website if you want to have scores be saved! 
 
 
 Below is a design document containing information about the original scope of the game. Not all of these features are implemented, but they remain as 
 a point of reference should development be continued on this project.
+
+------
+# Design Document
+## Getting Started
+Players will be able to create accounts to log in and save their progress in the game, as well as the growth of their Units for future play.
+Afterwards, hit the 'play' button on the front page to get started!
 
 ## The Game
 
